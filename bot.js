@@ -14,7 +14,7 @@ const TelegramBot = require('node-telegram-bot-api');
 */
 const token = "";   //bot token
 const URL = "";     //url to rss feed
-const INTERVALL = ; //update intervall in s
+const INTERVALL = 60; //update intervall in s
 
 // Create a bot
 const bot = new TelegramBot(token, {polling: true});
@@ -58,7 +58,7 @@ var Watcher    = require('feed-watcher'),
 feed     = URL,
 interval = INTERVALL // seconds
 
-  // if not interval is passed, 60s would be set as default interval.
+  // if no interval is passed, 60s would be set as the default interval.
   var watcher = new Watcher(feed, interval)
 
   // Check for new entries every n seconds.
@@ -130,7 +130,7 @@ function getTop5Entries (user) {
 (async () => {
   let feed = await parser.parseURL(URL);
 
-  resp = "<b>Last 5 chapters: </b> \n ";
+  resp = "<b>Last 5 updates: </b> \n ";
   for (const [index, el] of feed.items.entries()) {
     resp += "\n<b>[" + (index+1) + "] "+ el.title + "</b> \n" + el.pubDate + "\n" + el.link + "\n";
     if ( index === 4 ) break;
@@ -147,7 +147,7 @@ function getTop5Entries (user) {
   with entry.title for example you can access the title field of a item in the feed
 */
 function parseEntry(entry) {
-  response = "<b>New Chapter: " + entry.title + "\n </b>";
+  response = "<b>New Update: " + entry.title + "\n </b>";
   response += entry.link;
   return response;
 }
