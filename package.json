@@ -1,0 +1,28 @@
+{
+    "name": "telegram-rss-reader",
+    "version": "2.1.0",
+    "description": "A Telegram Bot that sends rss updates",
+    "main": "bot.js",
+    "scripts": {
+      "start": "node bot.js"
+    },
+    "dependencies": {
+      "node-telegram-bot-api": "",
+      "feed-watcher": "",
+      "rss-parser": ""
+    },
+    "engines": {
+      "node": "4.0.0"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/Janniku9/telegram-rss-reader"
+    },
+    "keywords": [
+      "node",
+      "telegram",
+      "rss"
+    ],
+    "author": "Janniku9",
+    "license": "MIT"
+  }
