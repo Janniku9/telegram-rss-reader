@@ -5,7 +5,7 @@
 a Telegram Bot that watches one RSS feed (or more) and sends notifications on updates
 
 <p align="center">
-    <img src="https://i.imgur.com/aMlDmBF.png" width="400"/>
+    <img src="https://i.imgur.com/24EkROy.jpg" width="400"/>
 </p>
 
 </div>
