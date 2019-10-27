@@ -9,12 +9,12 @@ const TelegramBot = require('node-telegram-bot-api');
   *TODO Step1 : Change these values
 
   *Token is the token you get from botfather
-  *URL is the Url of the rss-feed you want to watch
+  *URLS is an array of the Urls of the rss-feeds you want to watch
   *Intervall is the amount of seconds the watcher sleeps
 */
-const token = "";   //bot token
-const URL = "";     //url to rss feed
-const INTERVALL = 60; //update intervall in s
+const token = "";   // bot token from botfather
+const URLS = [""];     // array of urls to rss feeds
+const INTERVALL = 100; // update intervall in s
 
 // Create a bot
 const bot = new TelegramBot(token, {polling: true});
@@ -34,6 +34,13 @@ bot.onText(/\/sub/, (msg) => {
   addUser(String(user));
 });
 
+//this command is used to subscribe to the feed
+//only subscribed users will get notifications on new entries
+bot.onText(/\/feeds/, (msg) => {
+  const user = msg.chat.id;
+  getFeeds(String(user));
+});
+
 //this command is used to unsubscribe to the feed
 bot.onText(/\/unsub/, (msg) => {
   const user = msg.chat.id;
@@ -42,8 +49,10 @@ bot.onText(/\/unsub/, (msg) => {
 
 //this command returns the last 5 entries from the feed
 bot.onText(/\/top/, (msg) => {
+  i = parseInt(msg.text.substring(5)) - 1;
+  console.log(i)
   const user = msg.chat.id;
-  getTop5Entries(String(user));
+  getTop5Entries(String(user), i);
 });
 
 //create users.txt if it doesnt exist yet
@@ -53,20 +62,22 @@ if (!fs.existsSync('users.txt')) {
     console.log('created users.txt');
 }
 
-//init new rss watcher
-var Watcher    = require('feed-watcher'),
-feed     = URL,
-interval = INTERVALL // seconds
 
-  // if no interval is passed, 60s would be set as the default interval.
-  var watcher = new Watcher(feed, interval)
+for (URL of URLS) {
+  //init new rss watcher
+  var Watcher    = require('feed-watcher'),
+  feed     = URL,
+  interval = INTERVALL // seconds
 
-  // Check for new entries every n seconds.
-  watcher.on('new entries', function (entries) {
-    entries.forEach(function (entry) {
-      sendToAll(parseEntry(entry));
+    // if no interval is passed, 60s would be set as the default interval.
+    var watcher = new Watcher(feed, interval)
+
+    // Check for new entries every n seconds.
+    watcher.on('new entries', function (entries) {
+      entries.forEach(function (entry) {
+        sendToAll(parseEntry(entry));
+      })
     })
-  })
 
   // Start watching the feed.
   watcher
@@ -77,6 +88,7 @@ interval = INTERVALL // seconds
     .catch(function(error) {
       //console.error(error)
     })
+}
 
 //adds userId to users.txt
 function addUser (user) {
@@ -123,22 +135,36 @@ function sendToAll (message) {
 }
 
 //get last 5 item of the feed
-function getTop5Entries (user) {
+function getTop5Entries (user, i) {
+  if (i >= URLS.length || i < 0) {
+    resp = "Index out of Bounds"
+    bot.sendMessage(user, resp, {parse_mode : "HTML"});
+    return;
+  }
+
   let Parser = require('rss-parser');
   let parser = new Parser();
 
 (async () => {
-  let feed = await parser.parseURL(URL);
+  let feed = await parser.parseURL(URLS[i]);
 
   resp = "<b>Last 5 updates: </b> \n ";
   for (const [index, el] of feed.items.entries()) {
-    resp += "\n<b>[" + (index+1) + "] "+ el.title + "</b> \n" + el.pubDate + "\n" + el.link + "\n";
+    resp += "\n<b>[" + (i+1) + "." + (index+1) + "] "+ el.title + "</b> \n" + el.pubDate + "\n" + el.link + "\n";
     if ( index === 4 ) break;
   }
 
   bot.sendMessage(user, resp, {parse_mode : "HTML"});
 })();
 }
+
+  function getFeeds (user) {
+    resp = "<b>Your feeds: </b> \n \n";
+    for (i in URLS) {
+      resp += "<b>[" + (parseInt(i)+1) + "] </b>" + URLS[i] + "\n";
+    }
+    bot.sendMessage(user, resp, {parse_mode : "HTML"});
+  }
 
 /*
 
